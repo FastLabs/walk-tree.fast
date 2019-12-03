@@ -1,23 +1,31 @@
 (ns ^:figwheel-hooks walk-tree.fast
   (:require
    [goog.dom :as gdom]
+   [component.tree-view :as tree-w]
    [reagent.core :as reagent :refer [atom]]))
-
-(println "This text is printed from src/walk_tree/fast.cljs. Go ahead and edit it and see reloading in action.")
-
-(defn multiply [a b] (* a b))
-
 
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:text "Hello world!"}))
 
+
+(defn hello-world []
+  (let [data {:name    "Oleg Bulavitchi"
+              :some    {:some1 {:lala "foc"}}
+              :address {:country  "Modlova"
+                        :location "Ciobalaccia"}
+              :studies [{:name  "Scoala Ciobalaccia" :location "Ciobalaccia"
+                         :super {:name "test"}}
+                        {:name "Universitatea Tehnica" :location "Chishinau"}]}]
+    [:<>
+     [:div
+      [:h1 (:text @app-state)]
+      [:h3 "Simple Tree"]
+      [:div.mdc-card {:style {:padding 10}}
+       [tree-w/tree-view data]]]]))
+
 (defn get-app-element []
   (gdom/getElement "app"))
 
-(defn hello-world []
-  [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/walk_tree\fast.cljs and watch it change!"]])
 
 (defn mount [el]
   (reagent/render-component [hello-world] el))

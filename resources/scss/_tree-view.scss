@@ -1,0 +1,117 @@
+@import "mixin";
+
+.in-form {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  padding: 0;
+
+  &.focused {
+    & i {
+      &.material-icons {
+        color: orange !important;
+      }
+    }
+  }
+
+  .group-text {
+    display: flex;
+    white-space: nowrap;
+  }
+
+  input {
+    font-size: 12px;
+    color: #efefef;
+    position: relative;
+    flex: 1 1 auto;
+  }
+
+  & i {
+    &.material-icons {
+      padding-left: 0;
+      font-size: 18px;
+      color: gray !important;
+    }
+  }
+}
+
+
+.tree-view {
+  font-size: 12px;
+  color: gray;
+  overflow: auto;
+  @include scroll-nice();
+
+  .matched-part {
+    color: orange;
+  }
+
+  ul {
+    font-family: "Courier New", sans-serif;
+    font-size: 12px; //TODO: remove this as it is not required
+    margin: (0px, 0px, 0px, 26px);
+    list-style-type: none;
+    line-height: 18px;
+
+    li {
+      position: relative;
+    }
+  }
+
+  .collapser {
+    top: 1px;
+    position: absolute;
+    left: -1.5em;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .property {
+    font-weight: bold;
+  }
+
+  .number {
+    color: #536dfe;
+  }
+
+  .string {
+    color: green;
+  }
+
+  .boolean {
+    color: #7f43e8;
+  }
+
+  .struct {
+    &.collapsed {
+      border-radius: 3px;
+      background-color: transparent;
+      border: 1px solid;
+      cursor: pointer;
+    }
+  }
+
+  .expandable {
+    i {
+      transition: transform 0.2s linear;
+    }
+
+    .material-icons {
+      font-size: 12px;
+      padding: 0;
+
+      &.disabled {
+        color: gray !important;
+      }
+
+      &.hidden {
+        visibility: hidden;
+      }
+
+      &.expanded {
+        transform: rotate(90deg);
+      }
+    }
+  }
+}

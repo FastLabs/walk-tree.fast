@@ -13,3 +13,6 @@ pom.xml
 .rebel_readline_history
 *.iml
 /resources/public/cljs-out/
+/resources/public/css
+/resources/public/js
+/node_modules

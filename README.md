@@ -8,6 +8,11 @@ FIXME: Write a paragraph about the library/project and highlight its goals.
 
 ## Development
 
+To compile compile/watch the stylesheet
+
+* ``npm install`` 
+* ``npm run scss``
+
 To get an interactive development environment run:
 
     lein fig:build

@@ -1,4 +1,6 @@
-^{:watch-dirs ["test" "src"]
-  :css-dirs ["resources/public/css"]
+^{:watch-dirs   ["test" "src"]
+  :css-dirs     ["resources/public/css"]
   :auto-testing true}
-{:main walk-tree.fast}
+
+{:main     walk-tree.fast
+ :npm-deps false}

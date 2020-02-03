@@ -1,6 +1,8 @@
-^{:watch-dirs   ["test" "src"]
-  :css-dirs     ["resources/public/css"]
-  :auto-testing true}
+^{:watch-dirs       ["test" "src" "dev"]
+  :css-dirs         ["resources/public/css"]
+  :extra-main-files {:cards {:main walk-tree-cards.core}}
+  :auto-testing     true}
 
 {:main     walk-tree.fast
- :npm-deps false}
+ :npm-deps false
+ :devcards true}

@@ -1,0 +1,11 @@
+{:entity-specs {:status    :loaded
+                :available [{:entity-name     "CV"
+                             :entity-loader   {:loader-id :my-loader
+                                               :params    {:param-name "Name"}}
+                             :field-resolvers {:field-path ["city"]}}]}
+
+ :entities     {"first-1" {:entity-name "first"
+                           :params      [{:name "param-1"}]}}
+
+ :entity-views [{:name    "view-first-1"
+                 :content #{"first-1"}}]}

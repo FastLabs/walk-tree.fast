@@ -1,8 +1,22 @@
-//@import "material__button/mdc-button.scss";
+// Intellij recognize packages with ~ in front make easier to work, node sas can work without
 @import "tree-view";
-@import "@material/card/mdc-card";
-@import "@material/textfield/mdc-text-field";
+@import "~@material/card/mdc-card";
+@import "~@material/textfield/mdc-text-field";
+@import "~@material/textfield/mixins";
+@import "~@material/layout-grid/mdc-layout-grid";
+@import "search-bar";
+
 
 body {
-  color :black;
+  font-family: 'Roboto', sans-serif;
+}
+
+.my-edit {
+ // @include mdc-text-field-outlined-density(-3);
+  @include  mdc-text-field-outlined-with-leading-icon-density(-3);
+ // @include  mdc-text-field-density(-3)
+}
+
+.my-edit-1 {
+   @include  mdc-text-field-density(-3)
 }

@@ -8,15 +8,21 @@
 
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.597"]
-                 [reagent "0.8.1"]]
+                 [re-frame "0.10.7"]
+                 [reagent "0.8.1"]
+                 [martian-re-frame "0.1.11"]]
 
-  :source-paths ["src"]
+
+  :source-paths ["src" "dev"]
+  :resource-paths ["resources"]
 
   :aliases {"fig"       ["run" "-m" "figwheel.main"]
             "fig:build" ["run" "-m" "figwheel.main" "-b" "dev" "-r"]
             "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]
             "fig:test"  ["run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "walk-tree.test-runner"]}
 
-  :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.3"]]}})
+  :profiles {:dev {:dependencies [[compojure "1.6.1"]
+                                  [ring-middleware-format "0.7.4"]
+                                  [com.bhauman/figwheel-main "0.2.3"]]}})
 
 

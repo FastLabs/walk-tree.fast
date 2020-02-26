@@ -6,5 +6,11 @@
 
 (defcard-rg
   parameter-panel
-  [:div [tf/outlined-text-field {:placeholder "Continent"}]])
+  [:div
+   [:table
+    [:tr
+     [:td
+      [tf/outlined-text-field {:placeholder "Continent"}]]
+     [:td
+      [tf/outlined-text-field {:placeholder "Country" :value "Moldova"}]]]]])
 

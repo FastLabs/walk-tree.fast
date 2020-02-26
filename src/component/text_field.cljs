@@ -24,43 +24,51 @@
 
 (defmulti text-field-label (fn [type _] type) :default :standard)
 
-(defmethod text-field-label :standard [_ {:keys [for placeholder focus]}]
+(defmethod text-field-label :standard [_ {:keys [for placeholder raised?]}]
   [:<>
-   [:label (-> {:for for
+   [:label (-> {:for        for
                 :class-name "mdc-floating-label"}
-               (toggle-class #(= :on focus) "mdc-floating-label--float-above")) placeholder]
+               (toggle-class #(= raised? true) "mdc-floating-label--float-above")) placeholder]
    [:div.mdc-line-ripple {:style {:transform-origin "195px center"}}]])
 
 (defmethod text-field-label :outlined [_ {:keys [focus placeholder for]}]
+  (prn "@@@@")
   [:div#notch-outline
    (-> {:class-name "mdc-notched-outline mdc-notched-outline--upgraded"}
-       (toggle-class #(= :on focus) "mdc-notched-outline--notched"))
+       (toggle-class #(= true true) "mdc-notched-outline--notched"))
    [:div.mdc-notched-outline__leading]
-   [:div.mdc-notched-outline__notch {:style (toggle-attribute {} #(= :on focus) :width 56.75)}
+   [:div.mdc-notched-outline__notch {:style (toggle-attribute {} #(= true true) :width 56.75)}
     [:label
      (-> {:for        for
           :class-name "mdc-floating-label"}
-         (toggle-class #(= :on focus) "mdc-floating-label--float-above")) placeholder]]
+         (toggle-class #(= true true) "mdc-floating-label--float-above")) placeholder]]
    [:div.mdc-notched-outline__trailing]])
 
 
-(defn outlined-text-field [{:keys [id icon placeholder help-text type] :or {placeholder "text" type :standard}}]
+(defn outlined-text-field [{:keys [id icon placeholder help-text type value]
+                            :or   {placeholder "text"
+                                   value       ""
+                                   type        :standard}}]
   (let [status (ra/atom :off)
+        text-value (ra/atom value)
         text-outer-attrs (-> {:class-name "mdc-text-field text-field my-edit-1"}
                              (toggle-class #(= type :outlined) "mdc-text-field--outlined")
                              (toggle-class #(not (nil? icon)) "mdc-text-field--with-leading-icon "))]
     (fn []
-      (let [focus @status]
+
+      (let [raised (or (= :on @status) (> (count @text-value) 0))]
         [:div.text-field-container
          [:div#text-outer
           (-> text-outer-attrs
-              (toggle-class #(= :on focus) "mdc-text-field--focused"))
+              (toggle-class #(= raised true) "mdc-text-field--focused"))
           (when icon [:i.material-icons.mdc-text-field__icon icon])
           [:input.mdc-text-field__input
-           {:type     "text"
-            :on-blur  #(reset! status :off)
-            :on-focus #(reset! status :on)
-            :id       id}]
-          [text-field-label type {:for id :focus focus :placeholder placeholder}]]
+           {:type      "text"
+            :value     @text-value
+            :on-blur   #(reset! status :off)
+            :on-focus  #(reset! status :on)
+            :on-change #(reset! text-value (-> % .-target .-value))
+            :id        id}]
+          [text-field-label type {:for id :raised? raised :placeholder placeholder}]]
          (when help-text
            [text-field-helper {:id "text-field-outlined-leading"} help-text])]))))

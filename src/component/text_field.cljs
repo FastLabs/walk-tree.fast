@@ -3,9 +3,10 @@
             [reagent.core :as ra]))
 
 (defn toggle-class [attrs predicate new-class]
-  (if (predicate)
-    (update attrs :class-name #(str % " " new-class))
-    attrs))
+  (let [toggle? (if (fn? predicate) (predicate) predicate)]
+    (if toggle?
+      (update attrs :class-name #(str % " " new-class))
+      attrs)))
 
 (defn toggle-attribute [attrs predicate attribute value]
 
@@ -44,17 +45,22 @@
    [:div.mdc-notched-outline__trailing]])
 
 
-(defn outlined-text-field [{:keys [id icon placeholder help-text type value]
+(defn outlined-text-field [{:keys [id icon placeholder help-text type value disabled? on-change]
                             :or   {placeholder "text"
                                    value       ""
+                                   disabled?   false
                                    type        :standard}}]
   (let [status (ra/atom :off)
         label-opts {:for-el id :placeholder placeholder}
         text-value (ra/atom value)
-        on-cancel #(prn "Cancel requested")
+        el-ref (atom nil)
+        on-cancel #(when-let [el @el-ref]
+                     (.blur el))
         on-submit #(prn "Submit requested")
-        on-new-value #(reset! text-value %)
+        on-new-value #(-> (reset! text-value %)
+                          (on-change))
         text-outer-attrs (-> {:class-name "mdc-text-field text-field my-edit-1"}
+                             (toggle-class disabled? "mdc-text-field--disabled")
                              (toggle-class #(= type :outlined) "mdc-text-field--outlined")
                              (toggle-class #(not (nil? icon)) "mdc-text-field--with-leading-icon "))]
     (fn []
@@ -63,16 +69,19 @@
         [:div.text-field-container
          [:div#text-outer
           (-> text-outer-attrs
-              (toggle-class #(= raised true) "mdc-text-field--focused"))
+              (toggle-class raised "mdc-text-field--focused"))
           (when icon [:i.material-icons.mdc-text-field__icon icon])
           [:input.mdc-text-field__input
            {:type      "text"
+            :ref       (fn [el]
+                         (reset! el-ref el))
             :value     @text-value
             :on-blur   #(reset! status :off)
             :on-focus  #(reset! status :on)
             :on-key-up #(case (.-keyCode %)
-                              27 (on-cancel)
-                              13 (on-submit))
+                          27 (on-cancel)
+                          13 (on-submit)
+                          :none)
             :on-change #(on-new-value (-> % .-target .-value))
             :id        id}]
           [text-field-label type (assoc label-opts :raised? raised)]]

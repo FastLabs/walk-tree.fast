@@ -25,4 +25,4 @@
                                                  :on-change on-change-fn)]])
      [:div
       [:button.mdc-button
-       {:on-click #(prn "Request entity1" @state) } "GET"]]]))
+       {:on-click #(prn "Request entity1" (merge context @state) )} "GET"]]]))

@@ -1,0 +1,13 @@
+@import "~@material/button/mdc-button";
+
+.dense-btn-3 {
+  @include mdc-button-density(-3)
+}
+
+.dense-btn-2 {
+  @include mdc-button-density(-2)
+}
+
+.dense-btn-1 {
+  @include mdc-button-density(-1)
+}

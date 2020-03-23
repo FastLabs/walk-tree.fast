@@ -33,6 +33,7 @@
          (toggle-class #(= raised? true) "mdc-floating-label--float-above")) placeholder]]
    [:div.mdc-notched-outline__trailing]])
 
+;TODO: fix density problems
 
 (defn outlined-text-field [{:keys [id icon placeholder help-text type value disabled? on-change]
                             :or   {placeholder "text"
@@ -46,8 +47,9 @@
         on-cancel #(when-let [el @el-ref]
                      (.blur el))
         on-submit #(prn "Submit requested")
-        on-new-value #(-> (reset! text-value %)
-                          (on-change))
+        on-new-value (fn [next-val]
+                        (reset! text-value next-val)
+                        (when on-change (on-change @tex-value)))
         text-outer-attrs (-> {:class-name "mdc-text-field text-field my-edit-1"}
                              (toggle-class disabled? "mdc-text-field--disabled")
                              (toggle-class #(= type :outlined) "mdc-text-field--outlined")

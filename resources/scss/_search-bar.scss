@@ -1,5 +1,5 @@
-@import "~@material/button/mdc-button";
-@import "~@material/icon-button/mdc-icon-button";
+@use "~@material/button/mdc-button";
+@use "~@material/icon-button/mdc-icon-button";
 
 .search-bar-container {
   form {

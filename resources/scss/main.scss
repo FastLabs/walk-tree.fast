@@ -1,29 +1,18 @@
 // Intellij recognize packages with ~ in front make easier to work, node sas can work without
+
+@use "~@material/card/mdc-card";
+@use "~@material/layout-grid/mdc-layout-grid";
+@use "~@material/button/mdc-button";
+@use "~@material/icon-button/mdc-icon-button";
+@use "search-bar";
+@use "~@material/typography/mdc-typography";
+@use "button";
+@use "~@material/form-field/mdc-form-field";
+@use "simple";
+@use "textfeld";
 @import "tree-view";
-@import "~@material/card/mdc-card";
-@import "~@material/textfield/mdc-text-field";
-@import "~@material/textfield/mixins";
-@import "~@material/layout-grid/mdc-layout-grid";
-@import "~@material/button/mdc-button";
-@import "~@material/icon-button/mdc-icon-button";
-@import "search-bar";
-@import "~@material/typography/mdc-typography";
-@import "button";
-@import "~@material/form-field/mdc-form-field";
 
 body {
   font-family: 'Roboto', sans-serif;
 }
 
-.my-edit {
- // @include mdc-text-field-outlined-density(-3);
-  @include  mdc-text-field-outlined-with-leading-icon-density(-3);
- // @include  mdc-text-field-density(-3)
-}
-.my-button {
-  @include  mdc-icon-button-density(-3)
-}
-
-.my-edit-1 {
-   @include  mdc-text-field-density(-3)
-}

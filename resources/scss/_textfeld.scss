@@ -1,0 +1,10 @@
+@use "~@material/textfield/mdc-text-field";
+@use "~@material/textfield/index" as textfield;
+.my-edit-1 {
+  // @include textfield.density(-3);
+ // @include  textfield.outlined-with-leading-icon-density(-3);
+  // @include  mdc-text-field-density(-3)
+}
+.my-edit-2 {
+ // @include  textfield.density(-3)
+}

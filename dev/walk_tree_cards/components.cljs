@@ -3,6 +3,7 @@
   (:require [reagent.core :as ra]
             [component.text-field :as tf]
             [component.button :as btn]
+            [component.form-fields :as form]
             [devcards.core]))
 
 (defcard-rg
@@ -157,6 +158,9 @@
                    :density -3
                    :label   "-3"}]]]))
 
+(defcard-rg
+  form-fields
+  [:div [form/form-field [form/check-box {:id "one"}] "simple checkbox"]])
 
 
 

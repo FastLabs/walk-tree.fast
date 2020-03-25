@@ -35,25 +35,27 @@
 
 ;TODO: fix density problems
 
-(defn outlined-text-field [{:keys [id icon placeholder help-text type value disabled? on-change]
+(defn outlined-text-field [{:keys [id icon placeholder help-text type value disabled? on-change density]
                             :or   {placeholder "text"
+                                   density     0
                                    value       ""
                                    disabled?   false
                                    type        :standard}}]
-  (let [status (ra/atom :off)
-        label-opts {:for-el id :placeholder placeholder}
-        text-value (ra/atom value)
-        el-ref (atom nil)
-        on-cancel #(when-let [el @el-ref]
-                     (.blur el))
-        on-submit #(prn "Submit requested")
-        on-new-value (fn [next-val]
-                        (reset! text-value next-val)
-                        (when on-change (on-change @tex-value)))
-        text-outer-attrs (-> {:class-name "mdc-text-field text-field my-edit-1"}
+  (let [status           (ra/atom :off)
+        label-opts       {:for-el id :placeholder placeholder}
+        text-value       (ra/atom value)
+        el-ref           (atom nil)
+        on-cancel        #(when-let [el @el-ref]
+                            (.blur el))
+        on-submit        #(prn "Submit requested")
+        on-new-value     (fn [next-val]
+                           (reset! text-value next-val)
+                           (when on-change (on-change @text-value)))
+        text-outer-attrs (-> {:class-name "mdc-text-field text-field mdc-ripple-upgraded"}
                              (toggle-class disabled? "mdc-text-field--disabled")
                              (toggle-class #(= type :outlined) "mdc-text-field--outlined")
-                             (toggle-class #(not (nil? icon)) "mdc-text-field--with-leading-icon "))]
+                             (toggle-class #(not (nil? icon)) "mdc-text-field--with-leading-icon")
+                             (toggle-class #(not= density 0) (str "filled-text-field-density" density)))]
     (fn []
 
       (let [raised (or (= :on @status) (> (count @text-value) 0))]
@@ -62,6 +64,7 @@
           (-> text-outer-attrs
               (toggle-class raised "mdc-text-field--focused"))
           (when icon [:i.material-icons.mdc-text-field__icon icon])
+          [:div.mdc-text-field__ripple]
           [:input.mdc-text-field__input
            {:type      "text"
             :ref       (fn [el]

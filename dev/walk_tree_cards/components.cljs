@@ -1,7 +1,7 @@
 (ns walk-tree-cards.components
   (:require-macros [devcards.core :refer [defcard-rg defcard]])
   (:require [reagent.core :as ra]
-            [component.text-field :as tf]
+            [component.text-field :refer [outlined-text-field]]
             [component.button :as btn]
             [component.form-fields :as form]
             [devcards.core]))
@@ -12,21 +12,22 @@
    [:div
     [:h3 "Filled"]
     [:div {:style {:display :flex :align-items :flex-start :justify-content :space-between :flex-wrap :wrap}}
-     [tf/outlined-text-field {:placeholder "Continent"
-                              :help-text   "no value"}]
+     [outlined-text-field {:placeholder "Continent"
+                           :density     -4
+                           :help-text   "no value"}]
 
-     [tf/outlined-text-field {:placeholder "Country"
-                              :help-text   "has value"
-                              :value       "Moldova"}]
+     [outlined-text-field {:placeholder "Country"
+                           :help-text   "has value"
+                           :value       "Moldova"}]
 
-     [tf/outlined-text-field {:placeholder "Country"
-                              :help-text   "disabled"
-                              :disabled?   true
-                              :value       "Moldova"}]
+     [outlined-text-field {:placeholder "Country"
+                           :help-text   "disabled"
+                           :disabled?   true
+                           :value       "Moldova"}]
 
-     [tf/outlined-text-field {:placeholder "Country"
-                              :help-text   "has icon"
-                              :value       "Moldova"}]]]])
+     [outlined-text-field {:placeholder "Country"
+                           :help-text   "has icon"
+                           :value       "Moldova"}]]]])
 
 
 (defcard-rg

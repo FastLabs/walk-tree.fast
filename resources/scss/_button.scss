@@ -1,5 +1,6 @@
 @use "~@material/button/mdc-button";
 @use "~@material/button";
+@use "~@material/icon-button/mdc-icon-button";
 
 .dense-btn-3 {
   @include button.density(-3)

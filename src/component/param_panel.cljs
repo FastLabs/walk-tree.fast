@@ -6,23 +6,26 @@
 
 (defmulti param-editor :type :default :text)
 
-(defmethod param-editor :text [{:keys [title value id on-change]}]
+(defmethod param-editor :text [{:keys [title value id on-change disabled?]}]
+  (prn disabled?)
   [outlined-text-field {:placeholder title
+                        :density     -4
+                        :disabled?   disabled?
                         :on-change   (partial on-change id)
                         :value       value}])
 
-(defmulti params-panel (fn [entity] :draft) :default :draft)
 
-
-(defmethod params-panel :draft [{:keys [params]} context]
-  (let [state (r/atom {})
+(defn params-panel [params context on-context-change]
+  (let [state        (r/atom {})
         on-change-fn (fn [property value]
                        (swap! state assoc property value))]
-    [:div {:style {:display :flex :margin-bottom 20}}
-     (for [{:as param :keys [id]} params]
-       ^{:key param} [:div {:style {:margin-right 20}}
-                      [param-editor (assoc param :value (get context id)
-                                                 :on-change on-change-fn)]])
-     [:div
-      [:button.mdc-button
-       {:on-click #(prn "Request entity1" (merge context @state) )} "GET"]]]))
+    (fn []
+      [:div {:style {:display :flex :margin-bottom 10}}
+       (for [{:as param :keys [id]} params]
+         ^{:key param}
+         [:div {:style {:margin-right 10}}
+          [param-editor (assoc param :value (get context id)
+                                     :on-change on-change-fn)]])
+       [:div
+        [:button.mdc-button
+         {:on-click #(on-context-change (merge context @state))} "ok"]]])))

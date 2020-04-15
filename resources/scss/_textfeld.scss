@@ -6,6 +6,16 @@
    @include textfield.density(-4, 0);
 }
 
+.filled-text-field-density-3 {
+   @include textfield.density(-3, 0);
+}
+
+.filled-text-field-density-2 {
+   @include textfield.density(-2, 0);
+}
+
+
+
 .my-edit-2 {
  // @include  textfield.density(-3)
 }

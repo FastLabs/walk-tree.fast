@@ -26,6 +26,7 @@
     "@material/layout-grid": "^5.1.0",
     "@material/ripple": "^5.1.0",
     "@material/textfield": "^5.1.0",
+    "@material/top-app-bar": "^5.1.0",
     "create-react-class": "^15.6.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"

@@ -13,7 +13,7 @@
     [:h3 "Filled"]
     [:div {:style {:display :flex :align-items :flex-start :justify-content :space-between :flex-wrap :wrap}}
      [outlined-text-field {:placeholder "Continent"
-                           :density     -4
+                           :density     0
                            :help-text   "no value"}]
 
      [outlined-text-field {:placeholder "Country"

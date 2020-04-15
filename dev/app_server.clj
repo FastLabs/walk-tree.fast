@@ -7,17 +7,30 @@
 
 (defn all-entities
   []
-  [{:entity-id       "continent"
-    :entity-name     "continent"
-    :entity-loader   {:loader-id :continents
-                      :params    {:param-name "Name"}}
-    :field-resolvers {:field-path ["city"]}}
-   {:entity-id "entity-2"}
+  [{:entity-id     "continent"
+    :entity-name   "continent"
+    :entity-loader {:loader-id :continents}}
+   {:entity-id     "countries"
+    :entity-name   "countries"
+    :entity-loader {:loader-id :countries
+                    :params    [{:param-name "continent"}]}}
    {:entity-id "entity-3"}])
 
 (def continents [
-                 {:name "Asia"}
-                 {:name "North-America"}])
+                 {:name "Africa"
+                  :id   :africa}
+                 {:name "North America"
+                  :id   :north-america}
+                 {:name "South America"
+                  :id   :south-america}
+                 {:name "Europe"
+                  :id   :europe}
+                 {:name "Asia"
+                  :id   :asia}
+                 {:name "Antarctica"
+                  :id :antarctica}
+                 {:name "Australia"
+                  :id :australia}])
 
 (def countries {:asia   [{:name    "China"
                           :capital "xxx"}]

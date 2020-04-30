@@ -6,12 +6,12 @@
 
 (defmulti param-editor :type :default :text)
 
-(defmethod param-editor :text [{:keys [title value id on-change disabled?]}]
+(defmethod param-editor :text [{:keys [title value param-id on-change disabled?]}]
   (prn disabled?)
   [outlined-text-field {:placeholder title
                         :density     -4
                         :disabled?   disabled?
-                        :on-change   (partial on-change id)
+                        :on-change   (partial on-change param-id)
                         :value       value}])
 
 
@@ -21,10 +21,10 @@
                        (swap! state assoc property value))]
     (fn []
       [:div {:style {:display :flex :margin-bottom 10}}
-       (for [{:as param :keys [id]} params]
+       (for [{:as param :keys [param-id]} params]
          ^{:key param}
          [:div {:style {:margin-right 10}}
-          [param-editor (assoc param :value (get context id)
+          [param-editor (assoc param :value (get context param-id)
                                      :on-change on-change-fn)]])
        [:div
         [:button.mdc-button

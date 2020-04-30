@@ -13,8 +13,8 @@
                                :type       :text
                                :mandatory? true
                                :id         :country}]
-                :context {:country "Moldova"
-                          :status :final}}]
+                :context     {:country "Moldova"
+                              :status  :final}}]
 
 
 
@@ -25,12 +25,12 @@
 
 (defcard-rg
   parameter-panel
-  (let [params [{:title "Continent"
-                 :id    :continent
-                 :type  :text}
-                {:title "Country"
-                 :id    :country
-                 :type  :text}]]
+  (let [params [{:title    "Continent"
+                 :param-id :continent
+                 :type     :text}
+                {:title    "Country"
+                 :param-id :country
+                 :type     :text}]]
     [:div
      [pp/params-panel params {:continent "Eurasia"
                               :country   "Moldova"}]]))
@@ -38,9 +38,9 @@
 (defcard-rg
   draft-entity-view
   (let [entity {:data        {:cities ["Chisinau" "Cahul" "Cantemir" "Balti" "Soroca"]}
-                :params      [{:title "Country"
-                               :id    :country
-                               :type  :text}]
+                :params      [{:title    "Country"
+                               :param-id :country
+                               :type     :text}]
                 :context     {:country "Moldova"
                               :status  :draft}
                 :entity-name "Cities"}]
@@ -50,7 +50,7 @@
   final-entity-view
   (let [entity {:data        {:cities ["Chisinau" "Cahul" "Cantemir" "Balti" "Soroca"]}
                 :params      [{:title      "Country"
-                               :id         :country
+                               :param-id   :country
                                :mandatory? true
                                :type       :text}]
                 :context     {:country "Moldova"

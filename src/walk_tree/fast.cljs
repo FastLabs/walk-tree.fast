@@ -9,59 +9,84 @@
     [entities.entity-views :refer [entity-view]]
     [re-frame.core :as rf]
     [component.text-field :refer [outlined-text-field]]
-    [reagent.core :as reagent :refer [atom]]))
+    [reagent.core :refer [atom]]
+    [reagent.dom :as r-dom]))
 
 (rf/reg-event-db
-  ::initialise
+  :initialise
   (fn [_ _]
-    {:entities {}}))
+    {:entities {}
+     :loaded   {}}))
 
 (rf/reg-fx
-  ::entity-request []
+  :entity-request []
   {:db {}})
 
 
 (rf/reg-sub
-  ::entities
+  :entities
   (fn [db _]
     (get-in db [:entities :available])))
 
 (rf/reg-sub
-  ::loaded-entities
+  :loaded-entities
   (fn [db _]
-    (:loaded db)))
-
-
+    (->> (vals (:loaded db))
+         (map :instances)
+         ;(map vals)
+         (apply concat))))
 
 (defn app-header []
   [:div {:style {:width "100%"}}
    [search/search-bar]])
 
+(rf/reg-event-fx
+  :update-instance
+  (fn [{:keys [db]} [_ entity-name context]]
+    (prn entity-name context)
+    (let [db' (update-in db
+                         [:loaded entity-name :instances (:id context)]
+                         (fn [current]
+
+                           (-> (dissoc current :data)
+                               (assoc :context context))))]
+      (prn (:loaded db'))
+      {:db       db'
+       :dispatch [:entity-requested entity-name context]})))
+
+
 (defn container []
-  (let [entities @(rf/subscribe [::entities])
-        loaded @(rf/subscribe [::loaded-entities])]
+  (let [entities @(rf/subscribe [:entities])
+        loaded   @(rf/subscribe [:loaded-entities])]
     [:<>
      [:div
       [app-header]]
      [:div.mdc-layout-grid
       [:div.mdc-layout-grid__cell--span-8
        [:div "Entities: "
-        (for [{:keys [entity-name entity-loader] :as entity} entities]
+        (for [{:keys [entity-name entity-id] :as entity} entities]
           ^{:key entity} [:button.mdc-button
                           {:on-click #(do
-                                        (rf/dispatch [:entity-requested (keyword (:loader-id entity-loader)) {}])
+                                        (rf/dispatch [:entity-requested entity-id])
                                         (.preventDefault %))}
                           entity-name])]]
       (prn "--" loaded)
       [:div.mdc-layout-grid__cell--span-8
-         (for [{:keys [entity-name] :as entity-data} loaded]
-           ^{:key entity-name} [entity-view entity-data])]]]))
+       (for [[id {:keys [context entity-name] :as entity-data}] loaded]
+         ^{:key {:id          id
+                 :status      (:status context)
+                 :entity-name entity-name}}
+         [entity-view (assoc entity-data :on-param-change
+                                         (fn [new-context]
+                                           (let [context (merge new-context {:id     id
+                                                                             :status :loading})]
+                                             (rf/dispatch [:update-instance (:entity-name entity-data) context]))))])]]]))
 
 (defn get-app-element []
   (gdom/getElement "app"))
 
 (defn mount [el]
-  (reagent/render-component [container] el))
+  (r-dom/render [container] el))
 
 
 (defn mount-app-element []
@@ -70,7 +95,7 @@
 
 ;Called from index.html
 (defn ^:export init []
-  (rf/dispatch-sync [::initialise])
+  (rf/dispatch-sync [:initialise])
   (rf/dispatch-sync [::mc/init em/entities-martian])
   (rf/dispatch-sync [:entities-requested])
   (mount-app-element))

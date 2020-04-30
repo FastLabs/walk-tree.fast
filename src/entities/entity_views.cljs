@@ -30,7 +30,8 @@
    {:style {:margin 4}}
    [params-panel params context on-context-change]])
 
-(defn entity-view [{:keys [data entity-name context params]}]
+(defn entity-view [{:keys [data entity-name context params on-param-change]}]
+  ;TODO: understand why i need to status here?
   (let [state   (r/atom {:status (:status context)})
         swap-fn #(swap! state assoc :status :draft)]
     (fn []
@@ -39,4 +40,6 @@
         [entity-title entity-name params (assoc context :swap-fn swap-fn)]]
        (if (= :final (:status @state))
          [data-view data]
-         [config-view params context #(swap! state merge (assoc % :status :final))])])))
+         [config-view params context #(-> (swap! state merge (assoc % :status :final))
+                                          (dissoc :status)
+                                          (on-param-change))])])))

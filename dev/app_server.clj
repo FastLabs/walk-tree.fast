@@ -13,7 +13,10 @@
    {:entity-id     "countries"
     :entity-name   "countries"
     :entity-loader {:loader-id :countries
-                    :params    [{:param-name "continent"}]}}
+                    :params    [{:param-id    "continent"
+                                 :mandatory?   true
+                                 :title  "continent id"
+                                 :default-val "europe"}]}}
    {:entity-id "entity-3"}])
 
 (def continents [
@@ -28,9 +31,9 @@
                  {:name "Asia"
                   :id   :asia}
                  {:name "Antarctica"
-                  :id :antarctica}
+                  :id   :antarctica}
                  {:name "Australia"
-                  :id :australia}])
+                  :id   :australia}])
 
 (def countries {:asia   [{:name    "China"
                           :capital "xxx"}]

@@ -1,5 +1,6 @@
 (ns entities.martians
   (:require [martian.re-frame :as mr]
+            [schema.core :as s]
             [martian.cljs-http :as martian-http]))
 
 
@@ -13,7 +14,8 @@
                           :path-parts "/geo/continents"
                           :method     :get}
 
-                         {:route-name :country
-                          :path-parts "/geo/country/:country-id"
-                          :method     :get}]))
+                         {:route-name :countries
+                          :path-parts ["/geo/countries/" :continent]
+                          :method     :get
+                          :path-schema {:continent s/Str}}]))
 

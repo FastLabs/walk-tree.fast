@@ -8,9 +8,10 @@
 
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.597"]
-                 [re-frame "0.10.7"]
-                 [reagent "0.8.1"]
-                 [martian-re-frame "0.1.11"]]
+                 [re-frame "0.12.0"]
+                 [reagent "0.10.0"]
+                 [martian-re-frame "0.1.11"]
+                 [prismatic/schema "1.1.12"]]
 
 
   :resource-paths ["resources"]
@@ -25,6 +26,7 @@
                    :dependencies [[compojure "1.6.1"]
                                   [ring-middleware-format "0.7.4"]
                                   [devcards "0.2.6"]
-                                  [com.bhauman/figwheel-main "0.2.3"]]}})
+                                  [com.bhauman/figwheel-main "0.2.3"]
+                                  [day8.re-frame/re-frame-10x "0.6.2"]]}})
 
 

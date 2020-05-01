@@ -34,9 +34,12 @@
 (defn new-instance [{:keys [ins-count instances]
                      :or {ins-count 0
                           instances {}} :as container} new-entity]
-  (merge container
-         {:inst-count (inc ins-count)
-          :instances  (assoc instances (str "inst-" ins-count) new-entity)}))
+  (if-let [id (get-in new-entity [:context :id])]
+    (merge container
+           {:instances (assoc instances id new-entity)})
+    (merge container
+           {:ins-count (inc ins-count)
+            :instances (assoc instances (str "inst-" ins-count) new-entity)})))
 
 
 ;entity load events
@@ -50,6 +53,11 @@
                                                       :context     (merge context {:status :final})
                                                       :params      (:params entity-loader)
                                                       :data        body}))))
+
+(rf/reg-event-db
+  :dispose-instance
+  (fn [db [_ entity-name entity-id]]
+    (update-in db [:loaded entity-name :instances] dissoc entity-id)))
 
 (rf/reg-event-db
   :entity-load-failure

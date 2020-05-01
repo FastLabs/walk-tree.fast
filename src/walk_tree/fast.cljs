@@ -76,11 +76,12 @@
          ^{:key {:id          id
                  :status      (:status context)
                  :entity-name entity-name}}
-         [entity-view (assoc entity-data :on-param-change
-                                         (fn [new-context]
-                                           (let [context (merge new-context {:id     id
-                                                                             :status :loading})]
-                                             (rf/dispatch [:update-instance (:entity-name entity-data) context]))))])]]]))
+         [entity-view (merge entity-data
+                             {:id                id
+                              :on-entity-dispose (fn [dispose-id]
+                                                   (rf/dispatch [:dispose-instance entity-name dispose-id]))
+                              :on-param-change   (fn [new-context]
+                                                   (rf/dispatch [:update-instance entity-name new-context]))})])]]]))
 
 (defn get-app-element []
   (gdom/getElement "app"))

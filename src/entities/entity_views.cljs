@@ -1,5 +1,5 @@
 (ns entities.entity-views
-  (:require [re-frame.core :as ra]
+  (:require [re-frame.core :as rf]
             [reagent.core :as r]
             [component.param-panel :refer [params-panel]]
             [clojure.string :as str]
@@ -7,7 +7,7 @@
             [component.tree-view :as tree-w]))
 
 
-(defn entity-title [entity-name params {:keys [status swap-fn] :as context}]
+(defn entity-title [id entity-name params {:keys [status swap-fn dispose-fn] :as context}]
   [:div
    (let [param-path (->> (filter :mandatory? params)
                          (map :id)
@@ -15,10 +15,15 @@
                          (str/join "/"))
          title      (if (= status :final) (str entity-name "/" param-path) entity-name)]
      [app-bar/content-bar {:title   title
-                           :actions [{:label     "Edit Entity"
+                           :actions [{:label     "Edit"
                                       :icon      "edit"
-                                      :id        (str "edit-" entity-name)
-                                      :on-action (fn [_] (swap-fn))}]}])])
+                                      :id        (str "edit-" id)
+                                      :on-action (fn [_] (swap-fn))}
+                                     {:label     "Dispose"
+                                      :icon      "close"
+                                      :id        (str "delete-" id)
+                                      :on-action (fn [_] (dispose-fn id))}]}])])
+
 
 
 (defn data-view [data]
@@ -30,16 +35,19 @@
    {:style {:margin 4}}
    [params-panel params context on-context-change]])
 
-(defn entity-view [{:keys [data entity-name context params on-param-change]}]
+(defn entity-view [{:keys [id data entity-name context params on-param-change on-entity-dispose]}]
   ;TODO: understand why i need to status here?
   (let [state   (r/atom {:status (:status context)})
         swap-fn #(swap! state assoc :status :draft)]
     (fn []
       [:div.mdc-card.demo-basic-with-header
        [:div
-        [entity-title entity-name params (assoc context :swap-fn swap-fn)]]
+        [entity-title id entity-name params (assoc context
+                                              :dispose-fn on-entity-dispose
+                                              :swap-fn swap-fn)]]
        (if (= :final (:status @state))
          [data-view data]
          [config-view params context #(-> (swap! state merge (assoc % :status :final))
-                                          (dissoc :status)
+                                          (merge {:status :loading
+                                                  :id     id})
                                           (on-param-change))])])))

@@ -10,12 +10,16 @@
                           :path-parts "/entity/specs"
                           :method     :get}
 
+                         {:route-name :entity-loaders
+                          :path-parts "/entity/loaders"
+                          :method     :get}
+
                          {:route-name :continents
                           :path-parts "/geo/continents"
                           :method     :get}
 
-                         {:route-name :countries
-                          :path-parts ["/geo/countries/" :continent]
-                          :method     :get
+                         {:route-name  :country-by-id
+                          :path-parts  ["/geo/countries/" :continent]
+                          :method      :get
                           :path-schema {:continent s/Str}}]))
 

@@ -2,10 +2,14 @@
   (:require [re-frame.core :as rf]
             [martian.re-frame :as mr]))
 
-(defn entity-spec [{:keys [entities]} entity-id]
-  (->> (:available entities)
-       (filter #(= (:entity-id %) entity-id))
-       (first)))
+(defn entity-spec [{:keys [entities loaders]} entity-id]
+  (let [entity         (->> (:available entities)
+                            (filter #(= (:entity-id %) entity-id))
+                            (first))
+        entity-loaders (into {} (map (fn [{:keys [loader-id] :as loader}]
+                                       (let [loader-key (keyword loader-id)]
+                                         [loader-key (merge loader (get loaders loader-key))])) (:entity-loaders entity)))]
+    (assoc entity :loaders entity-loaders)))
 
 (defn loader-context [entity-loader]
   (->> (:params entity-loader)
@@ -18,18 +22,30 @@
   (fn [db [_ {:keys [body]} operation-id params]]
     (assoc db :entities {:status    :loaded
                          :available body})))
+(rf/reg-event-db
+  :loaders-received
+  (fn [db [_ {:keys [body]}]]
+    (assoc db :loaders body)))
 
 (rf/reg-event-db
-  :entities-load-failure
+  :failed-martian-request
   (fn [db [_ response-or-error operation-id params]]
-    (prn "Error to load entity" response-or-error operation-id params)
+    (prn "Error to load entity: " response-or-error operation-id params)
     db))
 
 (rf/reg-event-fx
   :entities-requested
   (fn [{:keys [db]} _]
     {:db       db
-     :dispatch [::mr/request :entity-specs {} :entities-loaded :entities-load-failure]}))
+     :dispatch [::mr/request :entity-specs {} :entities-loaded :failed-martian-request]}))
+
+(rf/reg-event-fx
+  :loaders-requested
+  (fn [{:keys [db]} _]
+    {:db       db
+     :dispatch [::mr/request :entity-loaders {} :loaders-received :failed-martian-request]}))
+
+
 
 (defn new-instance [{:keys [ins-count instances]
                      :or {ins-count 0
@@ -67,9 +83,9 @@
 
 (rf/reg-event-fx
   :entity-requested
-  (fn [{:keys [db]} [_ entity-id load-context]]
-    (let [{:keys [entity-loader]} (entity-spec db entity-id)
-          load-context (merge (loader-context entity-loader) load-context)]
+  (fn [{:keys [db]} [_ entity-id loader-id load-context]]
+    (let [{:keys [loaders]} (entity-spec db entity-id)
+          load-context (merge (loader-context (get loaders loader-id)) load-context)]
       {:db       db
-       :dispatch [::mr/request (keyword (:loader-id entity-loader)) load-context :entity-loaded :entity-load-failure]})))
+       :dispatch [::mr/request loader-id load-context :entity-loaded :entity-load-failure]})))
 

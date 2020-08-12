@@ -5,19 +5,25 @@
             [clojure.string :as str]
             [ring.middleware.format :refer [wrap-restful-format]]))
 
+(def entity-loaders {:country-by-id {:params [{:param-id    "continent"
+                                               :mandatory?  true
+                                               :title       "Continent Id"
+                                               :default-val "europe"}]}
+                     :continents    {}})
+
 (defn all-entities
   []
-  [{:entity-id     "continent"
-    :entity-name   "continent"
-    :entity-loader {:loader-id :continents}}
-   {:entity-id     "countries"
-    :entity-name   "countries"
-    :entity-loader {:loader-id :countries
-                    :params    [{:param-id    "continent"
-                                 :mandatory?   true
-                                 :title  "continent id"
-                                 :default-val "europe"}]}}
-   {:entity-id "entity-3"}])
+  [{:entity-id       "continent"
+    :entity-name     "continent"
+    :field-resolvers [{
+                       :loader-id :country-by-id
+                       :params    [{:param-id "continent"
+                                    :path     [:id]}]}]
+    :entity-loaders  [{:loader-id :continents}]}
+   {:entity-id      "countries"
+    :entity-name    "countries"
+    :entity-loaders [{:loader-id :country-by-id}]}])
+
 
 (def continents [
                  {:name "Africa"
@@ -44,9 +50,11 @@
 (defroutes handler
            (->
              (context "/api/v1" []
-               (GET "/entity/specs" []
-                 (-> (response (all-entities))
-                     #_(header "Content-Type" "application/json")))
+               (context "/entity" []
+                 (GET "/loaders" []
+                   (response entity-loaders))
+                 (GET "/specs" []
+                   (response (all-entities))))
                #_(GET "/app/:app-id" [app-id]
                    (response {:app-id (str "app->" app-id)}))
                (context "/geo" []

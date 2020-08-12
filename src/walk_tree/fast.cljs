@@ -52,11 +52,11 @@
                                (assoc :context context))))]
       (prn (:loaded db'))
       {:db       db'
-       :dispatch [:entity-requested entity-name context]})))
+       :dispatch [:entity-requested entity-name context :continents]}))) ;TODO: not hardcoded loader
 
 
 (defn container []
-  (let [entities @(rf/subscribe [:entities])
+  (let [entities @(rf/subscribe [:entities]) ;;TODO: maybe join the loaders in this subscription to avoid later lookup in :entity-requested event handler
         loaded   @(rf/subscribe [:loaded-entities])]
     [:<>
      [:div
@@ -67,7 +67,7 @@
         (for [{:keys [entity-name entity-id] :as entity} entities]
           ^{:key entity} [:button.mdc-button
                           {:on-click #(do
-                                        (rf/dispatch [:entity-requested entity-id])
+                                        (rf/dispatch [:entity-requested entity-id :continents]) ;TODO: no hardcoded loader j
                                         (.preventDefault %))}
                           entity-name])]]
       (prn "--" loaded)
@@ -98,6 +98,7 @@
 (defn ^:export init []
   (rf/dispatch-sync [:initialise])
   (rf/dispatch-sync [::mc/init em/entities-martian])
+  (rf/dispatch-sync [:loaders-requested])
   (rf/dispatch-sync [:entities-requested])
   (mount-app-element))
 

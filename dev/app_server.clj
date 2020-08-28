@@ -22,7 +22,8 @@
     :entity-loaders  [{:loader-id :continents}]}
    {:entity-id      "countries"
     :entity-name    "countries"
-    :entity-loaders [{:loader-id :country-by-id}]}])
+    :entity-loaders [{:loader-id       :country-by-id
+                      :default-loader? true}]}])
 
 
 (def continents [
@@ -44,7 +45,9 @@
 (def countries {:asia   [{:name    "China"
                           :capital "xxx"}]
                 :europe [{:name    "Romania"
-                          :capital "Bucharest"}]})
+                          :capital "Bucharest"}
+                         {:name    "Moldova"
+                          :capital "Chisinau"}]})
 
 
 (defroutes handler
@@ -59,6 +62,7 @@
                    (response {:app-id (str "app->" app-id)}))
                (context "/geo" []
                  (GET "/countries/:continent" [continent]
+                   (prn "+++++" continent)
                    (response (get countries (keyword (str/lower-case continent)))))
                  (GET "/continents" []
                    (response continents))))

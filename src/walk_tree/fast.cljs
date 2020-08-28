@@ -36,6 +36,11 @@
          ;(map vals)
          (apply concat))))
 
+(rf/reg-sub
+  :all-loaders
+  (fn [db _]
+    (:loaders db)))
+
 (defn app-header []
   [:div {:style {:width "100%"}}
    [search/search-bar]])
@@ -43,20 +48,32 @@
 (rf/reg-event-fx
   :update-instance
   (fn [{:keys [db]} [_ entity-name context]]
-    (prn entity-name context)
     (let [db' (update-in db
                          [:loaded entity-name :instances (:id context)]
                          (fn [current]
-
                            (-> (dissoc current :data)
                                (assoc :context context))))]
-      (prn (:loaded db'))
+      (prn "update entity: " entity-name context)
       {:db       db'
-       :dispatch [:entity-requested entity-name context :continents]}))) ;TODO: not hardcoded loader
+       :dispatch [:entity-requested entity-name context]})))
+
+(defn loaded-entities [loaded]
+  (let [all-loaders @(rf/subscribe [:all-loaders])]
+    [:div.mdc-layout-grid__cell--span-8
+     (for [[id {:keys [context entity-id] :as entity-data}] loaded]
+       ^{:key {:id          id
+               :status      (:status context)
+               :entity-id entity-id}}
+       [entity-view (merge entity-data
+                           {:id                id
+                            :on-entity-dispose (fn [dispose-id]
+                                                 (rf/dispatch [:dispose-instance entity-id dispose-id]))
+                            :on-param-change   (fn [new-context]
+                                                 (rf/dispatch [:update-instance entity-id new-context]))}) all-loaders])]))
 
 
 (defn container []
-  (let [entities @(rf/subscribe [:entities]) ;;TODO: maybe join the loaders in this subscription to avoid later lookup in :entity-requested event handler
+  (let [entities @(rf/subscribe [:entities])                ;;TODO: maybe join the loaders in this subscription to avoid later lookup in :entity-requested event handler
         loaded   @(rf/subscribe [:loaded-entities])]
     [:<>
      [:div
@@ -67,21 +84,10 @@
         (for [{:keys [entity-name entity-id] :as entity} entities]
           ^{:key entity} [:button.mdc-button
                           {:on-click #(do
-                                        (rf/dispatch [:entity-requested entity-id :continents]) ;TODO: no hardcoded loader j
+                                        (rf/dispatch [:entity-requested entity-id {}])
                                         (.preventDefault %))}
                           entity-name])]]
-      (prn "--" loaded)
-      [:div.mdc-layout-grid__cell--span-8
-       (for [[id {:keys [context entity-name] :as entity-data}] loaded]
-         ^{:key {:id          id
-                 :status      (:status context)
-                 :entity-name entity-name}}
-         [entity-view (merge entity-data
-                             {:id                id
-                              :on-entity-dispose (fn [dispose-id]
-                                                   (rf/dispatch [:dispose-instance entity-name dispose-id]))
-                              :on-param-change   (fn [new-context]
-                                                   (rf/dispatch [:update-instance entity-name new-context]))})])]]]))
+      [loaded-entities loaded]]]))
 
 (defn get-app-element []
   (gdom/getElement "app"))

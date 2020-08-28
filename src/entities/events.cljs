@@ -1,6 +1,7 @@
 (ns entities.events
   (:require [re-frame.core :as rf]
-            [martian.re-frame :as mr]))
+            [martian.re-frame :as mr]
+            [entities.loader :as entity-loader]))
 
 (defn entity-spec [{:keys [entities loaders]} entity-id]
   (let [entity         (->> (:available entities)
@@ -10,12 +11,6 @@
                                        (let [loader-key (keyword loader-id)]
                                          [loader-key (merge loader (get loaders loader-key))])) (:entity-loaders entity)))]
     (assoc entity :loaders entity-loaders)))
-
-(defn loader-context [entity-loader]
-  (->> (:params entity-loader)
-       (filter :default-val)
-       (map (fn [{:keys [param-id default-val]}] [param-id default-val]))
-       (into {})))
 
 (rf/reg-event-db
   :entities-loaded
@@ -61,14 +56,13 @@
 ;entity load events
 (rf/reg-event-db
   :entity-loaded
-  (fn [db [_ {:keys [body]} entity-id param-ctx]]
-    (let [entity-id (name entity-id)
-          {:keys [entity-loader]} (entity-spec db entity-id)
-          context   (merge (loader-context entity-loader) param-ctx)]
-      (update-in db [:loaded entity-id] new-instance {:entity-name entity-id
-                                                      :context     (merge context {:status :final})
-                                                      :params      (:params entity-loader)
-                                                      :data        body}))))
+  (fn [db [_ {:keys [body]} entity-loader {:keys [entity-id] :as param-ctx}]]
+    (prn "entity loaded: " entity-loader entity-id param-ctx)
+    (let [entity-id (name entity-id)]
+      (update-in db [:loaded entity-id] new-instance {:entity-id     entity-id
+                                                      :entity-loader entity-loader
+                                                      :context       (assoc param-ctx :status :final)
+                                                      :data          body}))))
 
 (rf/reg-event-db
   :dispose-instance
@@ -83,9 +77,10 @@
 
 (rf/reg-event-fx
   :entity-requested
-  (fn [{:keys [db]} [_ entity-id loader-id load-context]]
-    (let [{:keys [loaders]} (entity-spec db entity-id)
-          load-context (merge (loader-context (get loaders loader-id)) load-context)]
+  (fn [{:keys [db]} [_ entity-id load-context]]
+    (let [{:keys [loaders entities]} db
+          {:keys [loader-id] :as valid-context} (entity-loader/validate-loader-context (entity-spec db entity-id) load-context loaders)]
+      (prn "loader context: " entity-id valid-context)
       {:db       db
-       :dispatch [::mr/request loader-id load-context :entity-loaded :entity-load-failure]})))
+       :dispatch [::mr/request loader-id valid-context :entity-loaded :entity-load-failure]})))
 

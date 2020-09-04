@@ -6,6 +6,8 @@
             [entities.entity-views :as ew]
             [devcards.core]))
 
+;TODO fix these cards
+
 (defcard-rg
   entity-title
   (let [entity {:entity-name "Cities"

@@ -16,21 +16,38 @@
 (defn expandable-struct [expanded? on-expand-toggle-fn [struct-open struct-close] struct]
   [:<>
    [:span.struct {:class (when (not expanded?) "collapsed")}
-    [:span struct-open
-     (if expanded?
-       struct
-       [:span {:on-click #(on-expand-toggle-fn (not expanded?))} "..."])
-     [:span struct-close]]]])
+    [:span struct-open]
+    (if expanded?
+      struct
+      [:span {:on-click #(on-expand-toggle-fn (not expanded?))} "..."])
+    [:span struct-close]]])
 
-(defn fast-match-fn [val]
-  val)
+(defn fast-match-fn
+  ([v] v)
+  ([m v]
+   (if (str/blank? m)
+     v
+     (let [match-str (.toLowerCase m)
+           sv (str v)]
+       (loop [val-lower (.toLowerCase sv) val-original sv struct [:<>]]
+         (let [index (.indexOf val-lower match-str)]
+          (if (< index 0)
+            (if (>  (count val-original) 0)
+              (conj struct [:span val-original])
+              struct)
+            (let [match-length ( + index (count match-str))
+                  prefix (subs val-original 0 index)
+                  matched (subs val-original index match-length)]
+              (recur (subs val-lower match-length) ;TODO: check if i should not start from index?
+                     (subs val-original match-length)
+                     (conj struct [:span prefix] [:span {:class "matched-part"} matched]))))))))))
+
 
 (defn enrich-opts [{:keys [match-val] :as opts}]
   (let [match-fn (partial fast-match-fn match-val)]
-    (if match-val
+    (when match-val
       (assoc opts :name-render-fn (comp match-fn name)
-                  :val-render-fr match-fn)
-      opts)))
+                  :val-render-fn match-fn))))
 
 (defn expander [expanded? show-icon? expand-toggle-handler]
   [:div.collapser {:on-click #(expand-toggle-handler (not expanded?))}
@@ -41,7 +58,7 @@
 
 (defmulti structure-view (fn [value _] (guess-type value)) :default :string)
 
-(defn property-view [property value {:keys [name-render-fn opts]}]
+(defn property-view [property value {:keys [name-render-fn] :as opts}]
   (let [expanded?           (ra/atom true)
         on-expand-toggle-fn #(swap! expanded? not)
         show-collapse-icon? (contains? expandable-types (guess-type value))]
@@ -101,15 +118,15 @@
        [:div.group-text
         [:i.material-icons {:on-click #(on-change "")} "search"]]
        [:div
-        :input.mdl-textfield__input {:value        txt
-                                     :autoComplete :off
-                                     :type         :text
-                                     :on-focus     #(reset! focused? true)
-                                     :on-blur      #(reset! focused? false)
-                                     :on-change    #(-> % .-target .-value on-change)
-                                     :on-key-up    #(when (= 27 (.-keyCode %)) (on-change ""))
-                                     :placeholder  placeholder
-                                     :id           id}]])))
+        [:input.mdl-textfield__input {:value        txt
+                                      :autoComplete :off
+                                      :type         :text
+                                      :on-focus     #(reset! focused? true)
+                                      :on-blur      #(reset! focused? false)
+                                      :on-change    #(-> % .-target .-value on-change)
+                                      :on-key-up    #(when (= 27 (.-keyCode %)) (on-change ""))
+                                      :placeholder  placeholder
+                                      :id           id}]]])))
 
 (defmulti filter-struct (fn [value _] (guess-type value)) :default :string)
 
@@ -121,22 +138,22 @@
 (defmethod filter-struct :map [obj opts]
   (->> obj
        (map (fn [[p v]] (prop p v opts)))
-       (filter #(not (empty? %)))
+       (filter  #(not (empty? %)))
        (into {})))
 
 (defmethod filter-struct :seq [vals opts]
   (->> vals
-       (mapv #(filter-struct %1 opts))
-       (filter #(filter (not (empty? %1))))
+       (mapv #(filter-struct % opts))
+       (filter #(not (empty? %)))
        (vec)))
 
 (defmethod filter-struct :string [val {:keys [match-fn]}]
   (let [str-val (str val)]
     (when (match-fn str-val) str-val)))
 
-(defn partial-match [match-str val]
+(defn- partial-match [match-str val]
   (str/index-of (lower-case (str val))
-                (lower-case (match-str))))
+                (lower-case match-str)))
 
 (defn searchable-tree []
   (let [search-state (ra/atom "")]

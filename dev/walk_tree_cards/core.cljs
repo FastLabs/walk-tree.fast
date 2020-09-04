@@ -4,6 +4,7 @@
             [walk-tree-cards.stream-view]
             [walk-tree-cards.chips]
             [walk-tree-cards.app-bar-view]
+            [walk-tree-cards.tree-view]
             [reagent.core :as ra]
             [devcards.core :as dc]))
 

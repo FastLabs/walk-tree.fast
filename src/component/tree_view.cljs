@@ -1,5 +1,6 @@
 (ns component.tree-view
   (:require [reagent.core :as ra]
+            [component.utils :refer [toggle-class]]
             [clojure.string :as str :refer [lower-case]]))
 
 (defn guess-type [v]
@@ -19,7 +20,7 @@
     [:span struct-open]
     (if expanded?
       struct
-      [:span {:on-click #(on-expand-toggle-fn (not expanded?))} "..."])
+      [:span {:on-click #(when on-expand-toggle-fn (on-expand-toggle-fn (not expanded?)))} "..."])
     [:span struct-close]]])
 
 (defn fast-match-fn
@@ -45,9 +46,10 @@
 
 (defn enrich-opts [{:keys [match-val] :as opts}]
   (let [match-fn (partial fast-match-fn match-val)]
-    (when match-val
+    (if match-val
       (assoc opts :name-render-fn (comp match-fn name)
-                  :val-render-fn match-fn))))
+                  :val-render-fn match-fn)
+      opts)))
 
 (defn expander [expanded? show-icon? expand-toggle-handler]
   [:div.collapser {:on-click #(expand-toggle-handler (not expanded?))}
@@ -58,7 +60,7 @@
 
 (defmulti structure-view (fn [value _] (guess-type value)) :default :string)
 
-(defn property-view [property value {:keys [name-render-fn] :as opts}]
+(defn property-view [property value {:keys [name-render-fn on-value-click] :as opts}]
   (let [expanded?           (ra/atom true)
         on-expand-toggle-fn #(swap! expanded? not)
         show-collapse-icon? (contains? expandable-types (guess-type value))]
@@ -66,6 +68,7 @@
       (let [exp       @expanded?
             prop-opts (assoc opts
                         :expanded? exp
+                        :on-click #(on-value-click property value)
                         :on-expand-toggle-fn on-expand-toggle-fn)]
         [:div
          [:span (if name-render-fn (name-render-fn property) (str property)) " : "]
@@ -80,7 +83,7 @@
            (map-indexed (fn [index v]
                           ^{:key (str v "->" match-val "->" index)}
                           [:li                              ;TODO: embed here the expander, but the idea needs to be tested as it could polute the view
-                           [structure-view v (enrich-opts opts)]]))))]])
+                           [structure-view v (merge  (enrich-opts opts) {:expanded? expanded?})]]))))]])
 
 (defmethod structure-view :map [value {:keys [match-val expanded? on-expand-toggle-fn] :as opts}]
   [expandable-struct expanded? on-expand-toggle-fn ["{" "}"]
@@ -93,11 +96,13 @@
                [:li
                 [property-view p v (enrich-opts opts)]]))))]])
 
-(defmethod structure-view :string [value {:keys [val-render-fn]}]
-  [:span {:class (guess-type value)}
-   (if val-render-fn
-     (val-render-fn value)
-     (str value))])
+(defmethod structure-view :string [value {:keys [val-render-fn on-click]}]
+  (let [default-attributes {:class (guess-type value)
+                            :on-click #(when on-click (on-click value))}]
+    [:span (toggle-class default-attributes #(not (nil? on-click) ) "actionable")
+     (if val-render-fn
+       (val-render-fn value)
+       (str value))]))
 
 (defn tree-view
   ([tree-data]

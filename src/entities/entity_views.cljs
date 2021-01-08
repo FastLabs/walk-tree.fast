@@ -28,7 +28,7 @@
 
 (defn data-view [data]
   [:div {:style {:margin 4}}
-   [tree-w/tree-view data]])
+   [tree-w/tree-view data {:on-value-click #(prn %1 %2)}]])
 
 (defn config-view [context entity-loader all-loaders on-context-change]
   (let [loader          (get all-loaders entity-loader)

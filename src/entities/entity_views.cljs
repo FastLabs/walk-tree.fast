@@ -20,17 +20,19 @@
     (if (= status :final) (str entity-name "/" param-path) entity-name)))
 
 
-(defn entity-title [id {:keys [loader-id]} {:keys [swap-fn dispose-fn] :as context}]
-  [:div
-   [app-bar/content-bar {:title   (resource-title loader-id context)
-                         :actions [{:label     "Edit"
-                                    :icon      "edit"
-                                    :id        (str "edit-" id)
-                                    :on-action (fn [_] (swap-fn))}
-                                   {:label     "Dispose"
-                                    :icon      "close"
-                                    :id        (str "delete-" id)
-                                    :on-action (fn [_] (dispose-fn id))}]}]])
+(defn entity-title [id {:keys [loader-id params]} {:keys [swap-fn dispose-fn] :as context}]
+  (let [close-action {:label     "Dispose"
+                      :icon      "close"
+                      :id        (str "delete-" id)
+                      :on-action (fn [_] (dispose-fn id))}]
+    [:div
+     [app-bar/content-bar {:title   (resource-title loader-id context)
+                           :actions (if (not (empty? params)) [{:label     "Edit"
+                                                                :icon      "edit"
+                                                                :id        (str "edit-" id)
+                                                                :on-action (fn [_] (swap-fn))} close-action]
+                                                              [close-action])}]]))
+
 
 ;context: {:request-ctx {} :data-ctx {}}
 (defn property-click-handler
@@ -46,7 +48,7 @@
   [:div {:style {:margin 4}}
    [tree-w/tree-view data {:on-value-click #(property-click-handler %1 %2 context)}]])
 
-(defn config-view [context entity-loader  on-context-change]
+(defn config-view [context entity-loader on-context-change]
   (let [default-context (entity-loader/default-loader-context entity-loader)]
     [:div
      {:style {:margin 4}}

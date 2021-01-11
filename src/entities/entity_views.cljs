@@ -20,7 +20,7 @@
     (if (= status :final) (str entity-name "/" param-path) entity-name)))
 
 
-(defn entity-title [id loader-id {:keys [swap-fn dispose-fn] :as context}]
+(defn entity-title [id {:keys [loader-id]} {:keys [swap-fn dispose-fn] :as context}]
   [:div
    [app-bar/content-bar {:title   (resource-title loader-id context)
                          :actions [{:label     "Edit"
@@ -46,19 +46,16 @@
   [:div {:style {:margin 4}}
    [tree-w/tree-view data {:on-value-click #(property-click-handler %1 %2 context)}]])
 
-(defn config-view [context entity-loader all-loaders on-context-change]
-  (let [loader          (get all-loaders entity-loader)
-        default-context (entity-loader/default-loader-context loader)]
+(defn config-view [context entity-loader  on-context-change]
+  (let [default-context (entity-loader/default-loader-context entity-loader)]
     [:div
      {:style {:margin 4}}
-     [params-panel (:params loader) (merge default-context context {:entity-loader entity-loader}) on-context-change]]))
+     [params-panel (:params entity-loader) (merge default-context context {:entity-loader entity-loader}) on-context-change]]))
 
-(defn entity-view [{:keys [id data context entity-loader on-param-change on-entity-dispose] :as entity-data} all-loaders]
-  ;TODO: understand why i need to status here?
+(defn entity-view [{:keys [id data context entity-loader on-param-change on-entity-dispose] :as entity-data}]
   (let [state   (r/atom {:status (:status context)})
         swap-fn #(swap! state assoc :status :draft)]
     (fn []
-      (prn "Entity Loader " all-loaders)
       [:div.mdc-card.demo-basic-with-header
        [:div
         [entity-title id
@@ -68,7 +65,7 @@
            :swap-fn swap-fn)]]
        (if (= :final (:status @state))
          [data-view context data]
-         [config-view context entity-loader all-loaders #(-> (swap! state merge (assoc % :status :final))
-                                                             (merge {:status :loading
-                                                                     :id     id})
-                                                             (on-param-change))])])))
+         [config-view context entity-loader #(-> (swap! state merge (assoc % :status :final))
+                                                 (merge {:status :loading
+                                                         :id     id})
+                                                 (on-param-change))])])))

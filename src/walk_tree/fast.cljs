@@ -60,16 +60,17 @@
 (defn loaded-entities [loaded]
   (let [all-loaders @(rf/subscribe [:all-loaders])]
     [:div.mdc-layout-grid__cell--span-8
-     (for [[id {:keys [context entity-id] :as entity-data}] loaded]
+     (for [[id {:keys [context entity-id entity-loader] :as entity-data}] loaded]
        ^{:key {:id          id
                :status      (:status context)
                :entity-id entity-id}}
        [entity-view (merge entity-data
                            {:id                id
+                            :entity-loader (assoc  (get all-loaders entity-loader) :loader-id entity-loader)
                             :on-entity-dispose (fn [dispose-id]
                                                  (rf/dispatch [:dispose-instance entity-id dispose-id]))
                             :on-param-change   (fn [new-context]
-                                                 (rf/dispatch [:update-instance entity-id new-context]))}) all-loaders])]))
+                                                 (rf/dispatch [:update-instance entity-id new-context]))})])]))
 
 
 (defn container []

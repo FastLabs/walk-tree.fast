@@ -1,6 +1,7 @@
 (ns entities.martians
-  (:require [martian.re-frame :as mr]
+  (:require [martian.re-frame]
             [schema.core :as s]
+            [martian.core :as martian]
             [martian.cljs-http :as martian-http]))
 
 
@@ -23,3 +24,6 @@
                           :method      :get
                           :path-schema {:continent s/Str}}]))
 
+
+(defn get-path [route-name ctx]
+  (martian/url-for entities-martian route-name ctx))

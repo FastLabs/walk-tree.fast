@@ -76,8 +76,8 @@
   (let [entities @(rf/subscribe [:entities])                ;;TODO: maybe join the loaders in this subscription to avoid later lookup in :entity-requested event handler
         loaded   @(rf/subscribe [:loaded-entities])]
     [:<>
-     [:div
-      [app-header]]
+     #_[:div
+        [app-header]]
      [:div.mdc-layout-grid
       [:div.mdc-layout-grid__cell--span-8
        [:div "Entities: "

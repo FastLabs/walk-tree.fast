@@ -78,9 +78,8 @@
 (rf/reg-event-fx
   :entity-requested
   (fn [{:keys [db]} [_ entity-id load-context]]
-    (let [{:keys [loaders entities]} db
+    (let [{:keys [loaders]} db
           {:keys [loader-id] :as valid-context} (entity-loader/validate-loader-context (entity-spec db entity-id) load-context loaders)]
-      (prn "loader context: " entity-id valid-context)
       {:db       db
        :dispatch [::mr/request loader-id valid-context :entity-loaded :entity-load-failure]})))
 

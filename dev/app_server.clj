@@ -42,12 +42,25 @@
                  {:name "Australia"
                   :id   :australia}])
 
-(def countries {:asia   [{:name    "China"
-                          :capital "xxx"}]
-                :europe [{:name    "Romania"
-                          :capital "Bucharest"}
-                         {:name    "Moldova"
-                          :capital "Chisinau"}]})
+(def countries {:asia          [{:name    "China"
+                                 :capital "Beijing"}]
+                :europe        [{:name    "Romania"
+                                 :capital "Bucharest"}
+                                {:name    "Moldova"
+                                 :capital "Chisinau"}]
+                :australia     [{:name    "Australia"
+                                 :capital "Canberra"}]
+                :africa        [{:name    "Libya"
+                                 :capital "Tripoli"}]
+                :north-america [{:name    "Canada"
+                                 :capital "Ottawa"}
+                                {:name    "United States"
+                                 :capital "Washington D.C."}]
+                :south-america [{:name    "Argentina"
+                                 :capital "Buenos Aires"}
+                                {:name    "Brazil"
+                                 :capital "Brasilia"}]
+                :antarctica    []})
 
 
 (defroutes handler

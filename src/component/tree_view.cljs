@@ -29,19 +29,19 @@
    (if (str/blank? m)
      v
      (let [match-str (.toLowerCase m)
-           sv (str v)]
+           sv        (str v)]
        (loop [val-lower (.toLowerCase sv) val-original sv struct [:<>]]
          (let [index (.indexOf val-lower match-str)]
-          (if (< index 0)
-            (if (>  (count val-original) 0)
-              (conj struct [:span val-original])
-              struct)
-            (let [match-length ( + index (count match-str))
-                  prefix (subs val-original 0 index)
-                  matched (subs val-original index match-length)]
-              (recur (subs val-lower match-length) ;TODO: check if i should not start from index?
-                     (subs val-original match-length)
-                     (conj struct [:span prefix] [:span {:class "matched-part"} matched]))))))))))
+           (if (< index 0)
+             (if (> (count val-original) 0)
+               (conj struct [:span val-original])
+               struct)
+             (let [match-length (+ index (count match-str))
+                   prefix       (subs val-original 0 index)
+                   matched      (subs val-original index match-length)]
+               (recur (subs val-lower match-length)         ;TODO: check if i should not start from index?
+                      (subs val-original match-length)
+                      (conj struct [:span prefix] [:span {:class "matched-part"} matched]))))))))))
 
 
 (defn enrich-opts [{:keys [match-val] :as opts}]
@@ -50,6 +50,11 @@
       (assoc opts :name-render-fn (comp match-fn name)
                   :val-render-fn match-fn)
       opts)))
+
+(defn add-to-path [opts new-path]
+  (update opts :path conj new-path))
+
+
 
 (defn expander [expanded? show-icon? expand-toggle-handler]
   [:div.collapser {:on-click #(expand-toggle-handler (not expanded?))}
@@ -66,10 +71,13 @@
         show-collapse-icon? (contains? expandable-types (guess-type value))]
     (fn []
       (let [exp       @expanded?
-            prop-opts (assoc opts
-                        :expanded? exp
-                        :on-click #(on-value-click property value)
-                        :on-expand-toggle-fn on-expand-toggle-fn)]
+            prop-opts (->
+                        (add-to-path opts property)
+                        (assoc
+                          :expanded? exp
+                          ;:property-name property
+                          :on-click #(on-value-click property value)
+                          :on-expand-toggle-fn on-expand-toggle-fn))]
         [:div
          [:span (if name-render-fn (name-render-fn property) (str property)) " : "]
          [expander exp show-collapse-icon? on-expand-toggle-fn]
@@ -82,8 +90,8 @@
       (->> value
            (map-indexed (fn [index v]
                           ^{:key (str v "->" match-val "->" index)}
-                          [:li                              ;TODO: embed here the expander, but the idea needs to be tested as it could polute the view
-                           [structure-view v (merge  (enrich-opts opts) {:expanded? expanded?})]]))))]])
+                          [:li                              ;TODO: embed here the expander, but the idea needs to be tested as it could pollute the view
+                           [structure-view v (add-to-path (merge (enrich-opts opts) {:expanded? expanded?}) index)]]))))]])
 
 (defmethod structure-view :map [value {:keys [match-val expanded? on-expand-toggle-fn] :as opts}]
   [expandable-struct expanded? on-expand-toggle-fn ["{" "}"]
@@ -96,19 +104,20 @@
                [:li
                 [property-view p v (enrich-opts opts)]]))))]])
 
-(defmethod structure-view :string [value {:keys [val-render-fn on-click]}]
-  (let [default-attributes {:class (guess-type value)
+(defmethod structure-view :string [value {:keys [val-render-fn on-click path]}]
+  (let [default-attributes {:class    (guess-type value)
                             :on-click #(when on-click (on-click value))}]
-    [:span (toggle-class default-attributes #(not (nil? on-click) ) "actionable")
+    [:span (toggle-class default-attributes #(not (nil? on-click)) "actionable")
      (if val-render-fn
-       (val-render-fn value)
+       (val-render-fn path value)
        (str value))]))
 
 (defn tree-view
   ([tree-data]
    (tree-view tree-data {}))
   ([tree-data opts]
-   (let [opts (merge {:expanded? true} opts)]
+   (let [opts (merge {:expanded? true
+                      :path      []} opts)]
      [:div.tree-view
       [structure-view tree-data opts]])))
 
@@ -143,7 +152,7 @@
 (defmethod filter-struct :map [obj opts]
   (->> obj
        (map (fn [[p v]] (prop p v opts)))
-       (filter  #(not (empty? %)))
+       (filter #(not (empty? %)))
        (into {})))
 
 (defmethod filter-struct :seq [vals opts]

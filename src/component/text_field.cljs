@@ -51,7 +51,7 @@
         on-new-value     (fn [next-val]
                            (reset! text-value next-val)
                            (when on-change (on-change @text-value)))
-        text-outer-attrs (-> {:class-name "mdc-text-field text-field mdc-ripple-upgraded"}
+        text-outer-attrs (-> {:class-name "mdc-text-field mdc-ripple-upgraded"}
                              (toggle-class disabled? "mdc-text-field--disabled")
                              (toggle-class #(= type :outlined) "mdc-text-field--outlined")
                              (toggle-class #(not (nil? icon)) "mdc-text-field--with-leading-icon")

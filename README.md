@@ -1,10 +1,9 @@
 # walk-tree.fast
 
-FIXME: Write a one-line description of your library/project.
+Visualise the rest source navigation
 
 ## Overview
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
 
 ## Development
 
@@ -25,6 +24,13 @@ get a Browser Connected REPL. An easy way to try it is:
 
 and you should see an alert in the browser window.
 
+## TODO: 
+ - move to deps (somehow got used to it already)
+ - add cljc source folder (it does look that there will be shared code after all mostly for schema definition and projection definitions)
+ - layout management
+ - entity graph, 
+
+
 To clean all compiled files:
 
 	lein clean
@@ -35,8 +41,4 @@ To create a production build run:
 	lein fig:min
 
 
-## License
 
-Copyright © 2018 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.

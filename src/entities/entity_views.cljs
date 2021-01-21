@@ -43,10 +43,20 @@
                                                  :entity-id  "countries"
                                                  "continent" property-value}])))
 
-(defn data-view [context data]
-  (prn context)
+(defn path-matched? [path-template path]
+  (= (keyword (second  path-template)) (second path)))
+
+(defn match-resolver [field-resolvers path]
+  (first (filter #(path-matched? (-> field-resolvers first :params first :path) path) field-resolvers)))
+
+;TODO: review context content, maybe loader context is overpopulated maybe better to take loader outside
+(defn data-view [ {:keys [field-resolvers] :as x} context data]
   [:div {:style {:margin 4}}
-   [tree-w/tree-view data {:on-value-click #(property-click-handler %1 %2 context)}]])
+   [tree-w/tree-view data {:on-value-click #(property-click-handler %1 %2 context)
+                           :val-render-fn  (fn [path val]
+                                             (if-let [resolver  (match-resolver field-resolvers path)] ;TODO: finish the resolver part
+                                               [:span {:style {:color "red"}} val]
+                                               [:span val]))}]])
 
 (defn config-view [context entity-loader on-context-change]
   (let [default-context (entity-loader/default-loader-context entity-loader)]
@@ -54,7 +64,7 @@
      {:style {:margin 4}}
      [params-panel (:params entity-loader) (merge default-context context {:entity-loader entity-loader}) on-context-change]]))
 
-(defn entity-view [{:keys [id data context entity-loader on-param-change on-entity-dispose] :as entity-data}]
+(defn entity-view [entity-spec {:keys [id data context entity-loader on-param-change on-entity-dispose] :as entity-data}]
   (let [state   (r/atom {:status (:status context)})
         swap-fn #(swap! state assoc :status :draft)]
     (fn []
@@ -66,7 +76,7 @@
            :dispose-fn on-entity-dispose
            :swap-fn swap-fn)]]
        (if (= :final (:status @state))
-         [data-view context data]
+         [data-view entity-spec context data]
          [config-view context entity-loader #(-> (swap! state merge (assoc % :status :final))
                                                  (merge {:status :loading
                                                          :id     id})

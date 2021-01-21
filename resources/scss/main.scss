@@ -1,11 +1,11 @@
 // Intellij recognize packages with ~ in front make easier to work, node sas can work without
 
+@use "~@material/form-field/mdc-form-field";
+@use "~@material/typography/mdc-typography";
 @use "~@material/card/mdc-card";
 @use "~@material/layout-grid/mdc-layout-grid";
 @use "search-bar";
-@use "~@material/typography/mdc-typography";
 @use "button";
-@use "~@material/form-field/mdc-form-field";
 @use "simple";
 @use "textfeld";
 @use "formfield";

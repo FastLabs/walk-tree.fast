@@ -28,9 +28,12 @@
   (fn [db _]
     (get-in db [:entities :available])))
 
+(defn lookup-entity-spec [available-entities entity-id]
+  (first (filter #(= ( :entity-id % ) entity-id) available-entities)))
+
 (rf/reg-sub
   :loaded-entities
-  (fn [db _]
+  (fn [{:keys [:entities] :as db} _]
     (->> (vals (:loaded db))
          (map :instances)
          ;(map vals)
@@ -57,20 +60,22 @@
       {:db       db'
        :dispatch [:entity-requested entity-name context]})))
 
-(defn loaded-entities [loaded]
+(defn loaded-entities [available-entities loaded]
   (let [all-loaders @(rf/subscribe [:all-loaders])]
     [:div.mdc-layout-grid__cell--span-8
      (for [[id {:keys [context entity-id entity-loader] :as entity-data}] loaded]
        ^{:key {:id          id
                :status      (:status context)
                :entity-id entity-id}}
-       [entity-view (merge entity-data
-                           {:id                id
-                            :entity-loader (assoc  (get all-loaders entity-loader) :loader-id entity-loader)
-                            :on-entity-dispose (fn [dispose-id]
-                                                 (rf/dispatch [:dispose-instance entity-id dispose-id]))
-                            :on-param-change   (fn [new-context]
-                                                 (rf/dispatch [:update-instance entity-id new-context]))})])]))
+       [entity-view
+        (lookup-entity-spec available-entities entity-id)
+        (merge entity-data
+               {:id                id
+                :entity-loader (assoc  (get all-loaders entity-loader) :loader-id entity-loader)
+                :on-entity-dispose (fn [dispose-id]
+                                     (rf/dispatch [:dispose-instance entity-id dispose-id]))
+                :on-param-change   (fn [new-context]
+                                     (rf/dispatch [:update-instance entity-id new-context]))})])]))
 
 
 (defn container []
@@ -88,7 +93,7 @@
                                         (rf/dispatch [:entity-requested entity-id {}])
                                         (.preventDefault %))}
                           entity-name])]]
-      [loaded-entities loaded]]]))
+      [loaded-entities entities loaded]]]))
 
 (defn get-app-element []
   (gdom/getElement "app"))

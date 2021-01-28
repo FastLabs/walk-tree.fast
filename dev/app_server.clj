@@ -17,8 +17,9 @@
     :entity-name     "continent"
     :field-resolvers [{
                        :loader-id :country-by-id
+                       :entity-id "countries"
                        :params    [{:param-id "continent"
-                                    :path     [[]  :id]}]}]
+                                    :path     [[] :id]}]}]
     :entity-loaders  [{:loader-id :continents}]}
    {:entity-id      "countries"
     :entity-name    "countries"

@@ -11,10 +11,9 @@
       :loader-id
       (keyword)))
 
-(defn validate-loader-context [entity {:keys [loader-id] :as load-context} all-loaders]
+(defn validate-loader-context [{:keys [entity-id] :as entity} {:keys [loader-id] :as load-context} all-loaders]
   (if loader-id
-    load-context
+    (assoc load-context :entity-id entity-id)
     (let [loader-id     (default-loader entity)
           entity-loader (get all-loaders loader-id)]
-      (prn "default loader: " entity loader-id)
-      (assoc (default-loader-context entity-loader) :loader-id loader-id :entity-id (:entity-id entity)))))
+      (assoc (default-loader-context entity-loader) :loader-id loader-id :entity-id entity-id))))

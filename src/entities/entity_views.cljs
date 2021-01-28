@@ -33,30 +33,27 @@
                                                                 :on-action (fn [_] (swap-fn))} close-action]
                                                               [close-action])}]]))
 
-
-;context: {:request-ctx {} :data-ctx {}}
-(defn property-click-handler
-  [property-name property-value {:keys [entity-id] :as ctx}]
-  (when (and (= entity-id "continent") (= property-name :id))
-    (prn "Load countries for country" property-name " " property-value)
-    (rf/dispatch [:entity-requested "countries" {:loader-id  :country-by-id
-                                                 :entity-id  "countries"
-                                                 "continent" property-value}])))
-
 (defn path-matched? [path-template path]
-  (= (keyword (second  path-template)) (second path)))
+  (= (keyword (second path-template)) (second path)))
 
 (defn match-resolver [field-resolvers path]
   (first (filter #(path-matched? (-> field-resolvers first :params first :path) path) field-resolvers)))
 
+(defn build-param-context [param-spec path value]
+  (map (fn [{:keys [param-id]}] [param-id value]) param-spec))
+
 ;TODO: review context content, maybe loader context is overpopulated maybe better to take loader outside
-(defn data-view [ {:keys [field-resolvers] :as x} context data]
+(defn data-view [{:keys [field-resolvers]} context data]
   [:div {:style {:margin 4}}
-   [tree-w/tree-view data {:on-value-click #(property-click-handler %1 %2 context)
-                           :val-render-fn  (fn [path val]
-                                             (if-let [resolver  (match-resolver field-resolvers path)] ;TODO: finish the resolver part
-                                               [:span {:style {:color "red"}} val]
-                                               [:span val]))}]])
+   [tree-w/tree-view data {:val-render-fn (fn [path val]
+                                            (if-let [{:keys [entity-id loader-id params] :as resolver} (match-resolver field-resolvers path)]
+                                              [:span {:style    {:color  :red
+                                                                 :cursor :pointer}
+                                                      :on-click (fn [_]
+                                                                  (rf/dispatch [:entity-requested entity-id (merge
+                                                                                                              {:loader-id (keyword loader-id)}
+                                                                                                              (build-param-context params path val))]))} val]
+                                              [:span val]))}]])
 
 (defn config-view [context entity-loader on-context-change]
   (let [default-context (entity-loader/default-loader-context entity-loader)]

@@ -8,13 +8,22 @@
 (defcard-rg
   simple-tree
   [:div "Simple Structure"
-   [:div [tree-view/tree-view {:family [{:father "Oleg"}]}]]])
+   [:div [tree-view/tree-view {:family [{:father "Oleg"}]} {}]]])
 
 (defcard-rg
   searcheable-tree
   [:div "Search Structure"
    [tree-view/searchable-tree {:family {:structure [{:father "Oleg"
                                                      :mother "Lina"}
-                                                    {:son "luca"}]}}]])
+                                                    {:son "luca"}]}} {}]])
+
+(defcard-rg
+  scrollable-tree
+  [:div "Scroll Tree"
+   [:div
+    [tree-view/tree-view [{:name "oleg"}
+                          {:name "luca"}
+                          {:name "lina"}
+                          {:name "ioana"}]]]])
 
 

@@ -48,7 +48,7 @@
   (let [match-fn (partial fast-match-fn match-val)]
     (if match-val
       (assoc opts :name-render-fn (comp match-fn name)
-                  :val-render-fn match-fn)
+                  :val-render-fn (fn [_ _ val]  (match-fn val)))
       opts)))
 
 (defn add-to-path [opts new-path]
@@ -76,8 +76,8 @@
                         (assoc
                           :expanded? exp
                           ;:property-name property
-                          :on-click #(on-value-click property value)
-                          :on-expand-toggle-fn on-expand-toggle-fn))]
+                          :on-expand-toggle-fn on-expand-toggle-fn)
+                        (merge (when on-value-click {:on-click #(on-value-click property value)})))]
         [:div
          [:span (if name-render-fn (name-render-fn property) (str property)) " : "]
          [expander exp show-collapse-icon? on-expand-toggle-fn]

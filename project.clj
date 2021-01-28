@@ -26,7 +26,7 @@
                    :dependencies [[compojure "1.6.1"]
                                   [ring-middleware-format "0.7.4"]
                                   [devcards "0.2.6"]
-                                  [com.bhauman/figwheel-main "0.2.3"]
+                                  [com.bhauman/figwheel-main "0.2.12"]
                                   [day8.re-frame/re-frame-10x "0.6.2"]]}})
 
 

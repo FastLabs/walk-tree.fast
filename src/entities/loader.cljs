@@ -11,9 +11,12 @@
       :loader-id
       (keyword)))
 
-(defn validate-loader-context [{:keys [entity-id] :as entity} {:keys [loader-id] :as load-context} all-loaders]
-  (if loader-id
-    (assoc load-context :entity-id entity-id)
-    (let [loader-id     (default-loader entity)
-          entity-loader (get all-loaders loader-id)]
-      (assoc (default-loader-context entity-loader) :loader-id loader-id :entity-id entity-id))))
+(defn lookup-loader [available-loaders id]
+  (prn available-loaders)
+  (first  (filter (fn [{:keys [loader-id]}] (= id (keyword loader-id))) available-loaders)))
+
+
+(defn validate-loader-context [ all-loaders loader-id load-context]
+  (let [{:keys [return-entity] :as loader} (lookup-loader all-loaders loader-id)]
+    (merge (default-loader-context loader) {:entity-id return-entity} load-context)))
+

@@ -5,26 +5,36 @@
             [clojure.string :as str]
             [ring.middleware.format :refer [wrap-restful-format]]))
 
-(def entity-loaders {:country-by-id {:params [{:param-id    "continent"
-                                               :mandatory?  true
-                                               :title       "Continent Id"
-                                               :default-val "europe"}]}
-                     :continents    {}})
+(def entity-loaders [{:return-entity "country"
+                      :loader-id     :country-by-continent
+                      :params        [{:param-id    "continent"
+                                       :mandatory?  true
+                                       :title       "Continent Id"
+                                       :default-val "europe"}]}
+                     {:return-entity "city"
+                      :loader-id     :city-details
+                      :params        [{:param-id "country"}
+                                      {:param-id "city-name"}]}
+
+                     {:loader-id       :all-continents
+                      :default-loader? true
+                      :return-entity   "continent"}])
 
 (defn all-entities
   []
   [{:entity-id       "continent"
     :entity-name     "continent"
     :field-resolvers [{
-                       :loader-id :country-by-id
-                       :entity-id "countries"
-                       :params    [{:param-id "continent"
-                                    :path     [[] :id]}]}]
-    :entity-loaders  [{:loader-id :continents}]}
-   {:entity-id      "countries"
-    :entity-name    "countries"
-    :entity-loaders [{:loader-id       :country-by-id
-                      :default-loader? true}]}])
+                       :loader-id :country-by-continent
+                       :params    [{:param-id  "continent"
+                                    :path-spec [[] :id]}]}]}
+   {:entity-id       "country"
+    :field-resolvers [{:loader-id :city-details
+                       :params    [{:param-id  "country"
+                                    :path-spec [[] :name]}
+                                   {:param-id  "city-name"
+                                    :path-spec [[] :capital]}]}]
+    :entity-name     "country"}])
 
 
 (def continents [
@@ -61,7 +71,7 @@
                                  :capital "Buenos Aires"}
                                 {:name    "Brazil"
                                  :capital "Brasilia"}]
-                :antarctica    []})
+                :antarctica    ["none"]})
 
 
 (defroutes handler
@@ -76,7 +86,6 @@
                    (response {:app-id (str "app->" app-id)}))
                (context "/geo" []
                  (GET "/countries/:continent" [continent]
-                   (prn "+++++" continent)
                    (response (get countries (keyword (str/lower-case continent)))))
                  (GET "/continents" []
                    (response continents))))

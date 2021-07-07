@@ -15,11 +15,11 @@
                           :path-parts "/entity/loaders"
                           :method     :get}
 
-                         {:route-name :continents
+                         {:route-name :all-continents
                           :path-parts "/geo/continents"
                           :method     :get}
 
-                         {:route-name  :country-by-id
+                         {:route-name  :country-by-continent
                           :path-parts  ["/geo/countries/" :continent]
                           :method      :get
                           :path-schema {:continent s/Str}}]))

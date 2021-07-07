@@ -6,6 +6,7 @@ const styleEntryPoint = 'main';
 module.exports = [{
     mode: 'development',
     entry: './resources/scss/' + styleEntryPoint + '.scss',
+    //by default the output will be directed to dist folder, we need it into resources
     output: {
         path: path.resolve(__dirname, './resources/public'),
         // This is necessary for webpack to compile

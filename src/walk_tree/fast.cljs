@@ -4,6 +4,7 @@
     [martian.re-frame :as mc]
     [entities.martians :as em]
     [entities.events]
+    [entities.loader :as loader]
 
     [component.search-bar :as search]
     [entities.entity-views :refer [entity-view]]
@@ -29,7 +30,7 @@
     (get-in db [:entities :available])))
 
 (defn lookup-entity-spec [available-entities entity-id]
-  (first (filter #(= ( :entity-id % ) entity-id) available-entities)))
+  (first (filter #(= (:entity-id %) entity-id) available-entities)))
 
 (rf/reg-sub
   :loaded-entities
@@ -58,20 +59,20 @@
                                (assoc :context context))))]
       (prn "update entity: " entity-name context)
       {:db       db'
-       :dispatch [:entity-requested entity-name context]})))
+       :dispatch [:entity-requested (keyword (get-in context [:entity-loader :loader-id])) context]})))
 
 (defn loaded-entities [available-entities loaded]
   (let [all-loaders @(rf/subscribe [:all-loaders])]
     [:div.mdc-layout-grid__cell--span-8
      (for [[id {:keys [context entity-id entity-loader] :as entity-data}] loaded]
-       ^{:key {:id          id
-               :status      (:status context)
+       ^{:key {:id        id
+               :status    (:status context)
                :entity-id entity-id}}
        [entity-view
         (lookup-entity-spec available-entities entity-id)
         (merge entity-data
                {:id                id
-                :entity-loader (assoc  (get all-loaders entity-loader) :loader-id entity-loader)
+                :entity-loader     (loader/lookup-loader all-loaders entity-loader)
                 :on-entity-dispose (fn [dispose-id]
                                      (rf/dispatch [:dispose-instance entity-id dispose-id]))
                 :on-param-change   (fn [new-context]
@@ -80,19 +81,20 @@
 
 (defn container []
   (let [entities @(rf/subscribe [:entities])                ;;TODO: maybe join the loaders in this subscription to avoid later lookup in :entity-requested event handler
-        loaded   @(rf/subscribe [:loaded-entities])]
+        loaded   @(rf/subscribe [:loaded-entities])
+        default-loaders (filter  :default-loader? @(rf/subscribe [:all-loaders]))]
     [:<>
      #_[:div
         [app-header]]
      [:div.mdc-layout-grid
       [:div.mdc-layout-grid__cell--span-8
        [:div "Entities: "
-        (for [{:keys [entity-name entity-id] :as entity} entities]
+        (for [{:keys [loader-id] :as entity} default-loaders]
           ^{:key entity} [:button.mdc-button
                           {:on-click #(do
-                                        (rf/dispatch [:entity-requested entity-id {}])
+                                        (rf/dispatch [:entity-requested (keyword loader-id) {}])
                                         (.preventDefault %))}
-                          entity-name])]]
+                          loader-id])]]
       [loaded-entities entities loaded]]]))
 
 (defn get-app-element []

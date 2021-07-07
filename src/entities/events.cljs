@@ -3,15 +3,6 @@
             [martian.re-frame :as mr]
             [entities.loader :as entity-loader]))
 
-(defn entity-spec [{:keys [entities loaders]} entity-id]
-  (let [entity         (->> (:available entities)
-                            (filter #(= (:entity-id %) entity-id))
-                            (first))
-        entity-loaders (into {} (map (fn [{:keys [loader-id] :as loader}]
-                                       (let [loader-key (keyword loader-id)]
-                                         [loader-key (merge loader (get loaders loader-key))])) (:entity-loaders entity)))]
-    (assoc entity :loaders entity-loaders)))
-
 (rf/reg-event-db
   :entities-loaded
   (fn [db [_ {:keys [body]} operation-id params]]
@@ -77,9 +68,8 @@
 
 (rf/reg-event-fx
   :entity-requested
-  (fn [{:keys [db]} [_ entity-id load-context]]
-    (let [{:keys [loaders]} db
-          {:keys [loader-id] :as valid-context} (entity-loader/validate-loader-context (entity-spec db entity-id) load-context loaders)]
+  (fn [{:keys [db]} [_ loader-id load-context]]
+    (let [valid-context (entity-loader/validate-loader-context (:loaders db) loader-id load-context)]
       {:db       db
        :dispatch [::mr/request loader-id valid-context :entity-loaded :entity-load-failure]})))
 

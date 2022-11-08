@@ -37,21 +37,21 @@
   (= (keyword (second path-template)) (second path)))
 
 (defn match-resolver [field-resolvers path]
-  (first (filter #(path-matched? (-> field-resolvers first :params first :path-spec) path) field-resolvers)))
 
-(defn build-param-context [param-spec path value]
+  (first (filter (fn [field-resolver] (path-matched? (-> field-resolver :params first :path-spec) path)) field-resolvers)))
+
+(defn build-param-context [param-spec value]
   (map (fn [{:keys [param-id]}] [param-id value]) param-spec))
 
 ;TODO: review context content, maybe loader context is overpopulated maybe better to take loader outside
-(defn data-view [{:keys [field-resolvers]} context data]
-  (prn " conte xt "context)
+(defn data-view [{:keys [field-resolvers]} _context data]
   [:div {:style {:margin 4}}
    [tree-w/tree-view data {:val-render-fn (fn [path val]
                                             (if-let [{:keys [loader-id params]} (match-resolver field-resolvers path)]
                                               [:span {:style    {:color  :red
                                                                  :cursor :pointer}
                                                       :on-click (fn [_]
-                                                                  (rf/dispatch [:entity-requested (keyword loader-id) (build-param-context params path val)]))} val]
+                                                                  (rf/dispatch [:entity-requested (keyword loader-id) (build-param-context params val)]))} val] ;TODO: dispatched event should be able to select all field resolvers
                                               [:span val]))}]])
 
 (defn config-view [context entity-loader on-context-change]

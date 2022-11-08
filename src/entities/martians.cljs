@@ -22,7 +22,13 @@
                          {:route-name  :country-by-continent
                           :path-parts  ["/geo/countries/" :continent]
                           :method      :get
-                          :path-schema {:continent s/Str}}]))
+                          :path-schema {:continent s/Str}}
+
+                         {:route-name  :city-details
+                          :path-parts  ["/geo/city/" :country "/" :city-name]
+                          :method      :get
+                          :path-schema {:city-name s/Str
+                                        :country s/Str}}]))
 
 
 (defn get-path [route-name ctx]

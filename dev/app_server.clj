@@ -23,18 +23,22 @@
 (defn all-entities
   []
   [{:entity-id       "continent"
-    :entity-name     "continent"
+    :entity-name     "Continent"
     :field-resolvers [{
                        :loader-id :country-by-continent
                        :params    [{:param-id  "continent"
                                     :path-spec [[] :id]}]}]}
    {:entity-id       "country"
     :field-resolvers [{:loader-id :city-details
-                       :params    [{:param-id  "country"
-                                    :path-spec [[] :name]}
-                                   {:param-id  "city-name"
-                                    :path-spec [[] :capital]}]}]
-    :entity-name     "country"}])
+                       ;TODO: the ui will always pick the first one as main resolver, maybe a flag will be required
+                       :params    [{:param-id  "city-name"
+                                    :path-spec [[] :capital]}
+                                   {:param-id  "country"
+                                    :path-spec [[] :name]}]}]
+
+    :entity-name     "Country"}
+   {:entity-id   "city"
+    :entity-name "City"}])
 
 
 (def continents [
@@ -73,6 +77,9 @@
                                  :capital "Brasilia"}]
                 :antarctica    ["none"]})
 
+(def city-details {"Chisinau" {:population "1m"}
+                   "Bucharest" {:population "2m"}})
+
 
 (defroutes handler
            (->
@@ -87,6 +94,9 @@
                (context "/geo" []
                  (GET "/countries/:continent" [continent]
                    (response (get countries (keyword (str/lower-case continent)))))
+                 (GET "/city/:country/:city-name" [country city-name]
+                   (do (prn "fetch city details" country city-name)
+                       (response (get city-details city-name))))
                  (GET "/continents" []
                    (response continents))))
 

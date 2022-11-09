@@ -1,5 +1,11 @@
 # walk-tree.fast
 
+# TODO
+- last update: review path definition for the clickable property.
+- wouldn't it be better if there will not be entity definition, just path matchers?
+- move away from material? replace it with tailwind?
+- move away from figwheel?
+
 Visualise the rest source navigation
 
 ## Overview
